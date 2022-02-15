@@ -1,4 +1,4 @@
-package com.test;
+package com.recipe.test;
 
 import java.io.File;
 import java.io.FileNotFoundException;

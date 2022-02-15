@@ -1,6 +1,9 @@
-package com.test;
+package com.recipe.test;
 
 import org.testng.annotations.Test;
+
+import com.recipe.util.CommonMethods;
+
 import org.testng.annotations.BeforeTest;
 
 import java.io.IOException;
@@ -9,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -20,7 +24,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.annotations.AfterTest;
 
-public class ScrapRecipeByHealth {
+public class ScrapRecipeByCookingMethod {
 	WebDriver driver=null;
 	static String[] links = null;
 	String method;
@@ -43,20 +47,20 @@ public class ScrapRecipeByHealth {
 
 		driver.findElement(By.xpath("//a[@href='recipecategories.aspx?srchboxopt=r']")).click();
 
-		List<WebElement> cuisineLinks = driver.findElements(By.xpath("//div[@id='ctl00_cntleftpanel_ttlhealthtree_tvTtlHealthn0Nodes']//table//tbody//tr//td[3]//a"));
+		List<WebElement> cuisineLinks = driver.findElements(By.xpath("//div[@id='ctl00_cntleftpanel_methodtree_tvCookMethodn0Nodes']//table//tbody//tr//td[3]//a"));
 		List<String> links = new ArrayList<String>();
 		cuisineLinks.forEach((linkelement) -> links.add(linkelement.getAttribute("href")));
 
 		int linksSize = cuisineLinks.size();
 		System.out.println("linksSize:"+linksSize);
-		for (int j = 7; j < linksSize; j++) {
+		for (int j = 0; j < linksSize; j++) {
 			System.out.println("link number:"+j);
 			System.out.println("web page link:"+links.get(j));
-			Thread.sleep(1000);
+			driver.manage().timeouts().implicitlyWait(1000, TimeUnit.SECONDS);
 			if(!links.get(j).contains("javascript:")) {
 				driver.navigate().to(links.get(j));
 			// Traversing through the pages(using loop)
-			cm.iterateRecipes(driver,"Recipe_Health");
+			cm.iterateRecipes(driver,"Recipe_CookingMethod");
 			}else
 				System.out.println("No valid url");
 		}

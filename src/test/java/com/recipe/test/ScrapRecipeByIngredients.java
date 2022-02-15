@@ -1,4 +1,10 @@
-package com.test;
+package com.recipe.test;
+
+import org.testng.annotations.Test;
+
+import com.recipe.util.CommonMethods;
+
+import org.testng.annotations.BeforeTest;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,16 +14,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterTest;
 
-public class CommonMethods {
+public class ScrapRecipeByIngredients {
+	WebDriver driver=null;
 	static String[] links = null;
 	String method;
 	String nutrientValues;
@@ -29,54 +43,90 @@ public class CommonMethods {
 	Map<String, Object[]> recipeData = new TreeMap<String, Object[]>();
 	XSSFSheet spreadsheet;
 	XSSFRow rowno;
+	CommonMethods cm= new CommonMethods();
+	
 	XSSFWorkbook workbook ;
 	String row;
 	FileOutputStream outputStream;
-	/**
-	 * @param driver 
-	 * @param excelName 
-	 * @throws InterruptedException
-	 * @throws IOException
-	 */
-	public void iterateRecipes(WebDriver driver, String excelName) throws InterruptedException, IOException {
-		List<WebElement> pagination = driver.findElements(By.xpath("//div[@id='pagination']/a"));
-		List<String> pages = new ArrayList<String>();
-		pagination.forEach((linkelement) -> pages.add(linkelement.getAttribute("href")));
+	
+	HashMap<String, Integer> recipes = new HashMap<>();
 
-		int pgSize = pagination.size();
-		if (pagination.size() != 0) {
-			for (int j = 0; j <pgSize; j++) {
-				Thread.sleep(1000);
-				System.out.println("Page number :"+j+":: page url ::"+pages.get(j));
-				driver.navigate().to(pages.get(j));
-				recipeListIteration(driver, excelName);
-			}
-		}else {
-			recipeListIteration(driver, excelName);
+	@Test
+	public void scrapRecipe() throws InterruptedException, IOException {
+		cm.writeHeaderToExcel();
+
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+		driver.findElement(By.xpath("//a[@href='recipecategories.aspx?srchboxopt=r']")).click();
+		//driver.findElement(By.xpath("//div[@id='ctl00_cntleftpanel_ingtree_tvIngn0Nodes']//table//tbody//tr//td[2]//a[@id='ctl00_cntleftpanel_ingtree_tvIngn69']")).click();
+
+		List<WebElement> ingredientsInsidePlus = driver.findElements(By.xpath("//div[@id='ctl00_cntleftpanel_ingtree_tvIngn0Nodes']//table//tbody//tr//td[2]//a[@href]"));
+		List<String> inPlus = new ArrayList<String>();
+		ingredientsInsidePlus.forEach((linkelement) -> inPlus.add(linkelement.getAttribute("href")));
+
+		int inPlusSize = ingredientsInsidePlus.size();
+		System.out.println("InPlusSize:"+inPlusSize);
+		for (int i = 0; i < inPlusSize; i++) {
+			System.out.println("Plus number:"+i);
+			ingredientsInsidePlus.get(i).click();
+		List<WebElement> ingredientsInsideLinks = driver.findElements(By.xpath("//div[@id='ctl00_cntleftpanel_ingtree_tvIngn0Nodes']//div//table//tbody//tr//td[4]//a"));
+		List<String> inlinks = new ArrayList<String>();
+		ingredientsInsideLinks.forEach((linkelement) -> inlinks.add(linkelement.getAttribute("href")));
+
+		int inlinksSize = ingredientsInsideLinks.size();
+		System.out.println("IngredientsInsideLinks:"+ingredientsInsideLinks);
+		for (int k = 0; k < inlinksSize; k++) {
+			System.out.println("Inside Link :"+k+":: page url ::"+inlinks.get(k));
+			driver.navigate().to(inlinks.get(k));
+			// Traversing through the pages(using loop)
+			recipeListIteration(driver,"Recipe_Ingredients_1");
+			//div[@itemprop='ItemList']//article//div[@class='rcc_rcpcore']//span[@class='rcc_recipename']//a
+		}
 		}
 	}
-	/**
-	 * @param driver
-	 * @param excelName
-	 * @throws InterruptedException
-	 * @throws IOException
-	 */
+
+	@BeforeTest
+	public void beforeTest() {
+
+		//COMMON WAY TO RUN THE SCRIPT
+		/*System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDriver\\chromedriver.exe"); 
+        driver = new ChromeDriver();
+        driver.navigate().to("https://www.tarladalal.com/");
+		driver.manage().window().maximize();*/
+
+
+		//TO RUN THE SCRIPT FASTER
+		System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDriver\\chromedriver.exe");
+		ChromeOptions options = new ChromeOptions();
+		Map<String, Object> prefs = new HashMap<String, Object>();
+		prefs.put("profile.managed_default_content_settings.javascript", 2);
+		options.setExperimentalOption("prefs", prefs);
+		driver = new ChromeDriver(options);
+		driver.navigate().to("https://www.tarladalal.com/");
+		driver.manage().window().maximize();
+
+	}
+
+	@AfterTest
+	public void afterTest() {
+		driver.close();
+
+	}
 	public void recipeListIteration(WebDriver driver, String excelName) throws InterruptedException, IOException {
-		WebElement list = driver.findElement(By.xpath("//div[@class='recipelist']"));
-		List<WebElement> allLinks = list.findElements(By.xpath("//span[@class='rcc_recipename']/a"));
+		//div[@itemprop='ItemList']//article//div[@class='rcc_rcpcore']//span[@class='rcc_recipename']//a
+		//WebElement list = driver.findElement(By.xpath("//div[@itemprop='ItemList']"));
+		List<WebElement> allLinks = driver.findElements(By.xpath("//div[@itemprop='ItemList']//article//div[@class='rcc_rcpcore']//span[@class='rcc_recipename']//a"));
 		List<String> links = new ArrayList<String>();
 		allLinks.forEach((linkelement) -> links.add(linkelement.getAttribute("href")));
 
 		int totcount = allLinks.size();
-
+		System.out.println("Total number of recipes::"+totcount);
 		for (int i = 0; i < totcount; i++) {
 			System.out.println("Recipe number :"+i+":: Recipe url ::"+links.get(i));
 			driver.navigate().to(links.get(i));
 
 			// To get recipe ingredients
 			recipeLink = driver.getCurrentUrl();
-
-			HashMap<String, Integer> recipes = new HashMap<>();
 
 			List<String> recipeLinkList = new ArrayList();
 			recipeLinkList.add(recipeLink);
@@ -125,7 +175,7 @@ public class CommonMethods {
 					imageLink = driver.findElement(By.xpath("//img[@id='ctl00_cntrightpanel_imgRecipe']"))
 							.getAttribute("src");
 
-					Thread.sleep(1000);
+					driver.manage().timeouts().implicitlyWait(1000, TimeUnit.SECONDS);
 					row += String.valueOf(i);//not workinas it taking one link from each page and appending the excel
 
 					writeRecipeDetailsToExcel(excelName);
@@ -137,20 +187,29 @@ public class CommonMethods {
 
 		}
 	}
-	public void writeHeaderToExcel() {
+
+	/*public void writeHeaderToExcel() {
 		workbook = new XSSFWorkbook();
 		// spreadsheet object
-		spreadsheet
-		= workbook.createSheet(" Recipe Data ");
+		spreadsheet= workbook.createSheet(" Recipe Data ");
 
 		// This data needs to be written (Object[])
 
 		recipeData.put(
 				"1",
 				new Object[] { "Title", "Category", "Ingredients","Method", "Nutrient Values","Image Link","Recipe Link"});
-	}
+	}*/
 
 	public void writeRecipeDetailsToExcel(String excelName) throws IOException {
+		workbook = new XSSFWorkbook();
+		// spreadsheet object
+		spreadsheet= workbook.createSheet(" Recipe Data ");
+
+		// This data needs to be written (Object[])
+
+		recipeData.put(
+				"1",
+				new Object[] { "Title", "Category", "Ingredients","Method", "Nutrient Values","Image Link","Recipe Link"});
 		// workbook object
 
 		recipeData.put(row, 
@@ -178,11 +237,4 @@ public class CommonMethods {
 		workbook.write(outputStream);
 		outputStream.close();
 	}  
-
-	public static boolean isRecipeLinkAlreadyPresent(String recipeLink, List<String> hList) {
-		if(hList.contains(recipeLink)) {
-			return true;
-		}
-		return false;
-	}
 }
