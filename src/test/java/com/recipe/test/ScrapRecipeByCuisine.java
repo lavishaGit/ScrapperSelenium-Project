@@ -4,6 +4,8 @@ import org.testng.annotations.Test;
 
 import com.recipe.util.CommonMethods;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
+
 import org.testng.annotations.BeforeTest;
 
 import java.io.IOException;
@@ -53,7 +55,7 @@ public class ScrapRecipeByCuisine {
 		int linksSize = cuisineLinks.size();
 		System.out.println("linksSize:"+linksSize);
 		for (int j = 0; j < linksSize; j++) {
-			driver.manage().timeouts().implicitlyWait(1000, TimeUnit.SECONDS);
+			driver.manage().timeouts().implicitlyWait(1000, TimeUnit.MILLISECONDS);
 			if(!links.get(j).contains("javascript:"))
 			driver.navigate().to(links.get(j));
 		// Traversing through the pages(using loop)
@@ -64,10 +66,7 @@ public class ScrapRecipeByCuisine {
 
 	@BeforeTest
 	public void beforeTest() {
-		System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDriver\\chromedriver.exe"); 
-		driver = new ChromeDriver();
-		driver.navigate().to("https://www.tarladalal.com/");
-		driver.manage().window().maximize();
+		driver = cm.setUpHeadlessBrowser(driver);
 
 
 	}

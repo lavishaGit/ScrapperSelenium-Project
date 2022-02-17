@@ -4,6 +4,8 @@ import org.testng.annotations.Test;
 
 import com.recipe.util.CommonMethods;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
+
 import org.testng.annotations.BeforeTest;
 
 import java.io.IOException;
@@ -22,6 +24,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.testng.Reporter;
 import org.testng.annotations.AfterTest;
 
 public class ScrapRecipeByCookingMethod {
@@ -52,17 +55,16 @@ public class ScrapRecipeByCookingMethod {
 		cuisineLinks.forEach((linkelement) -> links.add(linkelement.getAttribute("href")));
 
 		int linksSize = cuisineLinks.size();
-		System.out.println("linksSize:"+linksSize);
+		System.out.println("LinksSize:"+linksSize);
 		for (int j = 0; j < linksSize; j++) {
-			System.out.println("link number:"+j);
-			System.out.println("web page link:"+links.get(j));
-			driver.manage().timeouts().implicitlyWait(1000, TimeUnit.SECONDS);
+			System.out.println("link number:"+j +" :: web page link ::"+links.get(j));
+			driver.manage().timeouts().implicitlyWait(1000, TimeUnit.MILLISECONDS);
 			if(!links.get(j).contains("javascript:")) {
 				driver.navigate().to(links.get(j));
 			// Traversing through the pages(using loop)
 			cm.iterateRecipes(driver,"Recipe_CookingMethod");
 			}else
-				System.out.println("No valid url");
+				Reporter.log("No valid url");
 		}
 
 	}
@@ -78,16 +80,13 @@ public class ScrapRecipeByCookingMethod {
 		
 		
 		//TO RUN THE SCRIPT FASTER
-		System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDriver\\chromedriver.exe");
-		ChromeOptions options = new ChromeOptions();
-        Map<String, Object> prefs = new HashMap<String, Object>();
-        prefs.put("profile.managed_default_content_settings.javascript", 2);
-        options.setExperimentalOption("prefs", prefs);
-        driver = new ChromeDriver(options);
-        driver.navigate().to("https://www.tarladalal.com/");
-		driver.manage().window().maximize();
+		//System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDriver\\chromedriver.exe");
+		//driver = cm.setUp(driver);
+		driver = cm.setUpHeadlessBrowser(driver);
 
 	}
+
+	
 
 	@AfterTest
 	public void afterTest() {

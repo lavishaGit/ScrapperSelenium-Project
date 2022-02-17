@@ -61,12 +61,9 @@ public class ScrapRecipeByEquipment {
 		int linksSize = cuisineLinks.size();
 		System.out.println("linksSize:"+linksSize);
 		for (int j = 0; j < linksSize; j++) {
-			driver.manage().timeouts().implicitlyWait(1000, TimeUnit.SECONDS);
+			driver.manage().timeouts().implicitlyWait(1000, TimeUnit.MILLISECONDS);
 			if(!links.get(j).contains("javascript:"))
 				driver.navigate().to(links.get(j));
-			// Traversing through the pages(using loop)
-			//driver.findElement(By.xpath("//a[@href='recipes-for-american-132']")).click();
-
 			// Traversing through the pages(using loop)
 			cm.recipeListIteration(driver,"Recipes_Equipment" );
 		}

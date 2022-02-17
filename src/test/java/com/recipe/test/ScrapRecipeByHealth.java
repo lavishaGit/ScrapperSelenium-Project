@@ -4,6 +4,8 @@ import org.testng.annotations.Test;
 
 import com.recipe.util.CommonMethods;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
+
 import org.testng.annotations.BeforeTest;
 
 import java.io.IOException;
@@ -47,16 +49,16 @@ public class ScrapRecipeByHealth {
 
 		driver.findElement(By.xpath("//a[@href='recipecategories.aspx?srchboxopt=r']")).click();
 
-		List<WebElement> cuisineLinks = driver.findElements(By.xpath("//div[@id='ctl00_cntleftpanel_ttlhealthtree_tvTtlHealthn0Nodes']//table//tbody//tr//td[3]//a"));
+		List<WebElement> healthLinks = driver.findElements(By.xpath("//div[@id='ctl00_cntleftpanel_ttlhealthtree_tvTtlHealthn0Nodes']//table//tbody//tr//td[3]//a"));
 		List<String> links = new ArrayList<String>();
-		cuisineLinks.forEach((linkelement) -> links.add(linkelement.getAttribute("href")));
+		healthLinks.forEach((linkelement) -> links.add(linkelement.getAttribute("href")));
 
-		int linksSize = cuisineLinks.size();
+		int linksSize = healthLinks.size();
 		System.out.println("linksSize:"+linksSize);
 		for (int j = 0; j < linksSize; j++) {
 			System.out.println("link number:"+j);
 			System.out.println("web page link:"+links.get(j));
-			driver.manage().timeouts().implicitlyWait(1000, TimeUnit.SECONDS);
+			driver.manage().timeouts().implicitlyWait(1000, TimeUnit.MILLISECONDS);
 			if(!links.get(j).contains("javascript:")) {
 				driver.navigate().to(links.get(j));
 			// Traversing through the pages(using loop)
@@ -70,6 +72,7 @@ public class ScrapRecipeByHealth {
 	@BeforeTest
 	public void beforeTest() {
 		
+
 		//COMMON WAY TO RUN THE SCRIPT
 		/*System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDriver\\chromedriver.exe"); 
         driver = new ChromeDriver();
@@ -78,14 +81,9 @@ public class ScrapRecipeByHealth {
 		
 		
 		//TO RUN THE SCRIPT FASTER
-		System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDriver\\chromedriver.exe");
-		ChromeOptions options = new ChromeOptions();
-        Map<String, Object> prefs = new HashMap<String, Object>();
-        prefs.put("profile.managed_default_content_settings.javascript", 2);
-        options.setExperimentalOption("prefs", prefs);
-        driver = new ChromeDriver(options);
-        driver.navigate().to("https://www.tarladalal.com/");
-		driver.manage().window().maximize();
+		//System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDriver\\chromedriver.exe");
+		//driver = cm.setUp(driver);
+		driver = cm.setUpHeadlessBrowser(driver);
 
 	}
 

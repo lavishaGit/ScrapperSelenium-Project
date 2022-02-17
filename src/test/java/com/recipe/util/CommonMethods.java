@@ -17,6 +17,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.testng.Reporter;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class CommonMethods {
 	static String[] links = null;
@@ -34,6 +39,41 @@ public class CommonMethods {
 	String row;
 	FileOutputStream outputStream;
 	HashMap<String, Integer> recipes = new HashMap<>();
+	
+	/**
+	 * driver initialization
+	 */
+	public WebDriver setUp(WebDriver driver) {
+		System.out.println("Setup method called");
+		WebDriverManager.chromedriver().setup();
+		ChromeOptions options = new ChromeOptions();
+        Map<String, Object> prefs = new HashMap<String, Object>();
+        prefs.put("profile.managed_default_content_settings.javascript", 2);
+        
+        options.setExperimentalOption("prefs", prefs);
+        driver = new ChromeDriver(options);
+        driver.navigate().to("https://www.tarladalal.com/");
+		driver.manage().window().maximize();
+		return driver;
+	}
+	
+	/**
+	 * headless initialization
+	 */
+	public WebDriver setUpHeadlessBrowser(WebDriver driver) {
+		WebDriverManager.chromedriver().setup();
+		ChromeOptions options =new ChromeOptions();
+		options.setHeadless(true);
+		HashMap<String, Object> prefs = new HashMap<String, Object>();
+		prefs.put("profile.managed_default_content_settings.images", 2);
+
+		options.setExperimentalOption("prefs", prefs);
+		driver = new ChromeDriver(options);
+		driver.navigate().to("https://www.tarladalal.com/");
+		driver.manage().window().maximize(); 
+		return driver;
+	}
+	
 	/**
 	 * @param driver 
 	 * @param excelName 
@@ -46,9 +86,10 @@ public class CommonMethods {
 		pagination.forEach((linkelement) -> pages.add(linkelement.getAttribute("href")));
 
 		int pgSize = pagination.size();
+		System.out.println("Number of pages :"+pgSize);
 		if (pagination.size() != 0) {
 			for (int j = 0; j <pgSize; j++) {
-				driver.manage().timeouts().implicitlyWait(1000, TimeUnit.SECONDS);
+				driver.manage().timeouts().implicitlyWait(1000, TimeUnit.MILLISECONDS);
 				System.out.println("Page number :"+j+":: page url ::"+pages.get(j));
 				driver.navigate().to(pages.get(j));
 				recipeListIteration(driver, excelName);
@@ -115,7 +156,7 @@ public class CommonMethods {
 						// If list size is non-zero, element is present
 					} else
 						// Else if size is 0, then element is not present
-						System.out.println("Element not present");
+						System.out.println("NutrientValues not present");
 
 					recipeTitle = driver.findElement(By.xpath("//span[@id='ctl00_cntrightpanel_lblRecipeName']"))
 							.getText();
@@ -125,8 +166,8 @@ public class CommonMethods {
 					imageLink = driver.findElement(By.xpath("//img[@id='ctl00_cntrightpanel_imgRecipe']"))
 							.getAttribute("src");
 
-					driver.manage().timeouts().implicitlyWait(1000, TimeUnit.SECONDS);
-					row += String.valueOf(i);//not workinas it taking one link from each page and appending the excel
+					driver.manage().timeouts().implicitlyWait(1000, TimeUnit.MILLISECONDS);
+					row += String.valueOf(i);
 
 					writeRecipeDetailsToExcel(excelName);
 				}else 
@@ -178,10 +219,4 @@ public class CommonMethods {
 		outputStream.close();
 	}  
 
-	public static boolean isRecipeLinkAlreadyPresent(String recipeLink, List<String> hList) {
-		if(hList.contains(recipeLink)) {
-			return true;
-		}
-		return false;
-	}
 }

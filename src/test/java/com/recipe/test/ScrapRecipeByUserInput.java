@@ -23,7 +23,7 @@ import org.testng.Reporter;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class ScrapRecipe {
+public class ScrapRecipeByUserInput {
 	WebDriver driver = null;
 	String recipeTitle;
 	String category;

@@ -1,11 +1,11 @@
 package com.recipe.test;
 
+
 import org.testng.annotations.Test;
 
 import com.recipe.util.CommonMethods;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
-import jdk.javadoc.doclet.Reporter;
 
 import org.testng.annotations.BeforeTest;
 
@@ -27,7 +27,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.annotations.AfterTest;
 
-public class ScrapRecipeByQuickRecipes {
+public class ScrapRecipeByOccasionParty {
 	WebDriver driver=null;
 	static String[] links = null;
 	String method;
@@ -50,26 +50,30 @@ public class ScrapRecipeByQuickRecipes {
 
 		driver.findElement(By.xpath("//a[@href='recipecategories.aspx?srchboxopt=r']")).click();
 
-		List<WebElement> cuisineLinks = driver.findElements(By.xpath("//div[@id='ctl00_cntleftpanel_quicktree_tvQuickn0Nodes']//table//tbody//tr//td[3]//a"));
+		List<WebElement> cuisineLinks = driver.findElements(By.xpath("//div[@id='ctl00_cntleftpanel_occtree_tvOccasionn0Nodes']//table//tbody//tr//td[3]//a"));
 		List<String> links = new ArrayList<String>();
 		cuisineLinks.forEach((linkelement) -> links.add(linkelement.getAttribute("href")));
 
 		int linksSize = cuisineLinks.size();
+		System.out.println("linksSize:"+linksSize);
 		for (int j = 0; j < linksSize; j++) {
+			System.out.println("link number:"+j);
+			System.out.println("web page link:"+links.get(j));
 			driver.manage().timeouts().implicitlyWait(1000, TimeUnit.MILLISECONDS);
 			if(!links.get(j).contains("javascript:")) {
 				driver.navigate().to(links.get(j));
-				// Traversing through the pages(using loop)
-				cm.iterateRecipes(driver,"Recipe_QuickRecipes");
-			}
+			// Traversing through the pages(using loop)
+			cm.iterateRecipes(driver,"Recipe_OccassionParty");
+			}else
+				System.out.println("No valid url");
 		}
 
 	}
 
 	@BeforeTest
 	public void beforeTest() {
-
-		cm.setUpHeadlessBrowser(driver);
+		
+	cm.setUpHeadlessBrowser(driver);
 
 	}
 

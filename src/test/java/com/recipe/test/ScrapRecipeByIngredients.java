@@ -4,6 +4,8 @@ import org.testng.annotations.Test;
 
 import com.recipe.util.CommonMethods;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
+
 import org.testng.annotations.BeforeTest;
 
 import java.io.FileOutputStream;
@@ -79,7 +81,7 @@ public class ScrapRecipeByIngredients {
 			System.out.println("Inside Link :"+k+":: page url ::"+inlinks.get(k));
 			driver.navigate().to(inlinks.get(k));
 			// Traversing through the pages(using loop)
-			recipeListIteration(driver,"Recipe_Ingredients_1");
+			recipeListIteration(driver,"Recipe_Ingredients");
 			//div[@itemprop='ItemList']//article//div[@class='rcc_rcpcore']//span[@class='rcc_recipename']//a
 		}
 		}
@@ -88,22 +90,7 @@ public class ScrapRecipeByIngredients {
 	@BeforeTest
 	public void beforeTest() {
 
-		//COMMON WAY TO RUN THE SCRIPT
-		/*System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDriver\\chromedriver.exe"); 
-        driver = new ChromeDriver();
-        driver.navigate().to("https://www.tarladalal.com/");
-		driver.manage().window().maximize();*/
-
-
-		//TO RUN THE SCRIPT FASTER
-		System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDriver\\chromedriver.exe");
-		ChromeOptions options = new ChromeOptions();
-		Map<String, Object> prefs = new HashMap<String, Object>();
-		prefs.put("profile.managed_default_content_settings.javascript", 2);
-		options.setExperimentalOption("prefs", prefs);
-		driver = new ChromeDriver(options);
-		driver.navigate().to("https://www.tarladalal.com/");
-		driver.manage().window().maximize();
+		driver = cm.setUpHeadlessBrowser(driver);
 
 	}
 
@@ -176,7 +163,7 @@ public class ScrapRecipeByIngredients {
 							.getAttribute("src");
 
 					driver.manage().timeouts().implicitlyWait(1000, TimeUnit.SECONDS);
-					row += String.valueOf(i);//not workinas it taking one link from each page and appending the excel
+					row += String.valueOf(i);
 
 					writeRecipeDetailsToExcel(excelName);
 				}else 
